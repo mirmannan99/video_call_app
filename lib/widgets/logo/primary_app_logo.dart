@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_call_app/constants/app_images.dart';
+import 'package:video_call_app/core/constants/app_images.dart';
 
 class PrimaryAppLogo extends StatelessWidget {
   const PrimaryAppLogo({

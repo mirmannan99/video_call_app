@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_call_app/style/app_color.dart';
+import 'package:video_call_app/core/style/app_color.dart';
 
 class PrimaryButton extends StatelessWidget {
   final void Function()? onPressed;

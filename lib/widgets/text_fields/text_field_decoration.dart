@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../style/app_color.dart';
+import '../../core/style/app_color.dart';
 import '../dimension.dart';
 
 InputDecoration textFieldMainDecoration({

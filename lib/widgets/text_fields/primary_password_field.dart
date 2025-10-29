@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../style/app_color.dart';
+import '../../core/style/app_color.dart';
 import 'text_field_decoration.dart';
 
 class PrimaryPasswordFormField extends StatelessWidget {
