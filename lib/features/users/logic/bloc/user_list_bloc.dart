@@ -19,7 +19,6 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
     try {
       final currentState = state;
 
-      // Show loader only for first-time load
       if (event.page == 1 &&
           !event.isRefresh &&
           currentState is! UserListLoaded) {
@@ -29,7 +28,6 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
       final response = await UserRepository.fetchUsers(page: event.page);
 
       if (response.error) {
-        // Preserve cached data if available
         if (currentState is UserListLoaded) {
           emit(currentState);
         } else {
@@ -63,14 +61,13 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
     } catch (e) {
       final currentState = state;
       if (currentState is UserListLoaded) {
-        emit(currentState); // Keep last good cache
+        emit(currentState);
       } else {
         emit(UserListError(e.toString()));
       }
     }
   }
 
-  // ✅ Restore last successful cached state
   @override
   UserListState? fromJson(Map<String, dynamic> json) {
     try {
@@ -86,13 +83,10 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
           hasMore: json['hasMore'] as bool? ?? false,
         );
       }
-    } catch (_) {
-      // ignore malformed cache
-    }
+    } catch (_) {}
     return null;
   }
 
-  // ✅ Persist only loaded state
   @override
   Map<String, dynamic>? toJson(UserListState state) {
     if (state is UserListLoaded) {

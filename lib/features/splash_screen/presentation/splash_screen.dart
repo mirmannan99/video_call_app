@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:video_call_app/core/style/app_color.dart';
+import 'package:video_call_app/features/auth/presentation/auth_screen.dart';
 import 'package:video_call_app/widgets/logo/primary_app_logo.dart';
+
+import '../../../data/hive/hive_helper.dart';
+import '../../users/presentation/user_list_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,6 +23,23 @@ class _SplashScreenState extends State<SplashScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _animate = true);
     });
+    checkLoginStatus();
+  }
+
+  checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 2));
+    final isLoggedIn = await HiveHelper.getAuthToken() != null;
+    if (mounted) {
+      if (isLoggedIn) {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
+      } else {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const AuthScreen()));
+      }
+    }
   }
 
   @override

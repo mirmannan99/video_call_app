@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_call_app/features/splash_screen/presentation/splash_screen.dart';
 import 'package:video_call_app/features/users/logic/bloc/user_list_bloc.dart';
+
+import 'data/hive/hive_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +16,12 @@ Future<void> main() async {
       (await getTemporaryDirectory()).path,
     ),
   );
+  //+ Hive
+  await Hive.initFlutter();
+  await Hive.openBox(HiveBoxNames.userBox);
 
   HydratedBloc.storage = storage;
+
   runApp(ProviderScope(child: const MyApp()));
 }
 
