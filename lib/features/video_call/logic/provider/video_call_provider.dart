@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,8 @@ class VideoCallProvider extends ChangeNotifier {
   bool _speakerOn = true;
   bool _remoteVideoOn = false;
   bool _isSharing = false;
+  int? _dataStreamId;
+  bool _remoteEndRequested = false;
 
   // Getters for UI
   RtcEngine? get engine => _engine;
@@ -33,9 +37,10 @@ class VideoCallProvider extends ChangeNotifier {
   bool get speakerOn => _speakerOn;
   bool get remoteVideoOn => _remoteVideoOn;
   bool get isSharing => _isSharing;
+  bool get remoteEndRequested => _remoteEndRequested;
 
   Future<void> init() async {
-    if (_engine != null) return; // already initialized
+    if (_engine != null) return;
     await AppPermissions.requestVideoCallPermissions();
 
     final engine = createAgoraRtcEngine();
@@ -43,9 +48,17 @@ class VideoCallProvider extends ChangeNotifier {
 
     engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (connection, elapsed) {
+        onJoinChannelSuccess: (connection, elapsed) async {
           debugPrint("Local user joined channel");
           _localUserJoined = true;
+          // Create a reliable, ordered data stream for simple signaling (end call, etc.)
+          try {
+            _dataStreamId = await engine.createDataStream(
+              const DataStreamConfig(ordered: true, syncWithAudio: false),
+            );
+          } catch (e) {
+            debugPrint('createDataStream failed: $e');
+          }
           notifyListeners();
         },
         onUserJoined: (connection, remoteUid, elapsed) {
@@ -79,6 +92,18 @@ class VideoCallProvider extends ChangeNotifier {
                     state == RemoteVideoState.remoteVideoStateStarting;
                 _remoteVideoOn = isOn;
                 notifyListeners();
+              }
+            },
+        onStreamMessage:
+            (connection, remoteUid, streamId, data, length, sentTs) {
+              try {
+                final message = utf8.decode(data);
+                if (message == 'END_CALL') {
+                  _remoteEndRequested = true;
+                  notifyListeners();
+                }
+              } catch (e) {
+                debugPrint('onStreamMessage decode error: $e');
               }
             },
       ),
@@ -133,6 +158,8 @@ class VideoCallProvider extends ChangeNotifier {
     _speakerOn = true;
     _remoteVideoOn = false;
     _isSharing = false;
+    _dataStreamId = null;
+    _remoteEndRequested = false;
     notifyListeners();
   }
 
@@ -212,6 +239,27 @@ class VideoCallProvider extends ChangeNotifier {
       } catch (_) {}
       _isSharing = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> endCall(BuildContext context) async {
+    try {
+      if (_dataStreamId != null) {
+        final bytes = Uint8List.fromList(utf8.encode('END_CALL'));
+        await _engine?.sendStreamMessage(
+          streamId: _dataStreamId!,
+          data: bytes,
+          length: bytes.length,
+        );
+      }
+    } catch (e) {
+      debugPrint('sendStreamMessage failed: $e');
+    }
+
+    await disposeEngine();
+    if (Navigator.canPop(context)) {
+      // Pop back to previous screen
+      Navigator.of(context).pop();
     }
   }
 }

@@ -73,6 +73,16 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     final p = ref.watch(videoCallProvider);
+    if (p.remoteEndRequested) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Call ended by the other user')),
+        );
+        await ref.read(videoCallProvider).disposeEngine();
+        if (Navigator.canPop(context)) Navigator.of(context).pop();
+      });
+    }
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -121,7 +131,7 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
             const SizedBox(width: 20),
             _controlButton(
               Icons.call_end,
-              () => Navigator.pop(context),
+              () => ref.read(videoCallProvider).endCall(context),
               color: Colors.red,
             ),
           ],
