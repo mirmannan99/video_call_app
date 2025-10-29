@@ -57,7 +57,7 @@ InputDecoration passwordFieldMainDecoration({
   required String labelText,
   TextStyle? labelStyle,
   required bool isObscure,
-  required void Function() onShowPassword,
+  required void Function() hideShowPassword,
 }) {
   const defaultLabelStyle = TextStyle(fontSize: 14);
   final updatedLabelStyle =
@@ -87,7 +87,7 @@ InputDecoration passwordFieldMainDecoration({
     suffixIcon: IconButton(
       color: isObscure ? AppColors.primary : AppColors.secondary,
       icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
-      onPressed: onShowPassword,
+      onPressed: hideShowPassword,
     ),
     enabledBorder: OutlineInputBorder(
       borderSide: const BorderSide(color: AppColors.textDark),
@@ -98,10 +98,7 @@ InputDecoration passwordFieldMainDecoration({
       borderRadius: Dimensions.defaultBorderRadius,
     ),
     errorBorder: OutlineInputBorder(
-      borderSide: BorderSide(
-        color: AppColors.danger.withOpacity(0.5),
-        width: 2,
-      ),
+      borderSide: BorderSide(color: AppColors.danger.withAlpha(125), width: 2),
       borderRadius: Dimensions.defaultBorderRadius,
     ),
     focusedBorder: OutlineInputBorder(

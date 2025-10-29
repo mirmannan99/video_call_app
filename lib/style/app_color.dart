@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._(); // singleton class with no instance variable and no constructor method
-  static const Color primary = Color(0xFFd32a31);
+  static const Color primary = Color(0xFF00B1AC);
   static const Color secondary = Color(0xFF272f6c);
 
   static const Color textDark = Color(0xFF2A3439);

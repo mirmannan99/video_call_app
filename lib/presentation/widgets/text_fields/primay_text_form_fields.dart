@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../style/app_color.dart';
 import 'text_field_decoration.dart';
@@ -9,6 +10,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType? textInputType;
   final String? Function(String?)? validation;
+  final List<TextInputFormatter>? inputFormatters;
 
   const PrimaryTextFormField({
     super.key,
@@ -17,6 +19,7 @@ class PrimaryTextFormField extends StatelessWidget {
     this.textInputAction,
     this.textInputType,
     this.validation,
+    this.inputFormatters,
   });
 
   @override
@@ -32,6 +35,7 @@ class PrimaryTextFormField extends StatelessWidget {
       textInputAction: textInputAction,
       keyboardType: textInputType,
       cursorColor: AppColors.primary,
+      inputFormatters: inputFormatters,
       validator: validation,
       decoration: textFieldMainDecoration(
         hintText: label ?? '',

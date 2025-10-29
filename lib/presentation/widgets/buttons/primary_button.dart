@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_call_app/style/app_color.dart';
 
 class PrimaryButton extends StatelessWidget {
   final void Function()? onPressed;
@@ -34,23 +35,14 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final bool isClickable = !isDisabled && !isLoading;
-
-    final Color resolvedBackgroundColor =
-        backgroundColor ??
-        (isClickable ? colorScheme.primary : colorScheme.secondary);
-    final Color resolvedTextColor = textColor ?? (colorScheme.onPrimary);
-
     return SizedBox(
       width: width,
       height: height,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: resolvedBackgroundColor,
-          foregroundColor: resolvedTextColor,
+          backgroundColor: AppColors.primary,
+
           padding:
               padding ??
               const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -65,7 +57,7 @@ class PrimaryButton extends StatelessWidget {
                 width: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(resolvedTextColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
             : Row(
@@ -78,7 +70,7 @@ class PrimaryButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: fontSize,
                       fontWeight: fontWeight,
-                      color: resolvedTextColor,
+                      color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),

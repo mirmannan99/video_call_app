@@ -9,7 +9,7 @@ class PrimaryPasswordFormField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType? textInputType;
   final String? Function(String?)? validation;
-  final void Function()? onShowPassword;
+  final void Function()? hideShowPassword;
   final bool isObscure;
 
   const PrimaryPasswordFormField({
@@ -19,7 +19,7 @@ class PrimaryPasswordFormField extends StatelessWidget {
     this.textInputAction,
     this.textInputType,
     this.validation,
-    this.onShowPassword,
+    this.hideShowPassword,
     required this.isObscure,
   });
 
@@ -36,13 +36,14 @@ class PrimaryPasswordFormField extends StatelessWidget {
       textInputAction: textInputAction,
       keyboardType: textInputType,
       cursorColor: AppColors.primary,
+      obscureText: isObscure,
       validator: validation,
       decoration: passwordFieldMainDecoration(
         hintText: label ?? '',
         labelText: label ?? '',
         labelStyle: const TextStyle(fontSize: 14, color: AppColors.textLight),
-        isObscure: isObscure,
-        onShowPassword: onShowPassword ?? (() {}),
+        isObscure: !isObscure,
+        hideShowPassword: hideShowPassword ?? (() {}),
       ),
     );
   }
