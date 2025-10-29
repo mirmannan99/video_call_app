@@ -77,9 +77,17 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Call ended by the other user')),
+          const SnackBar(
+            content: Text(
+              'Call ended by the other user',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            backgroundColor: Colors.redAccent,
+          ),
         );
         await ref.read(videoCallProvider).disposeEngine();
+        if (!context.mounted) return;
         if (Navigator.canPop(context)) Navigator.of(context).pop();
       });
     }
@@ -93,10 +101,7 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
             right: 10,
             width: 120,
             height: 160,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: _localPreview(),
-            ),
+            child: _localPreview(),
           ),
           bottomBar(p),
         ],
