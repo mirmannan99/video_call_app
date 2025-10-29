@@ -5,7 +5,7 @@ import '../../../widgets/buttons/primary_button.dart';
 import '../../../widgets/logo/primary_app_logo.dart';
 import '../../../widgets/text_fields/primary_password_field.dart';
 import '../../../widgets/text_fields/primay_text_form_fields.dart';
-import '../provider/auth_provider.dart';
+import '../logic/auth_provider.dart';
 
 class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
