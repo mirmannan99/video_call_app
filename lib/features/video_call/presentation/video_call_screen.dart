@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   bool _usingFrontCamera = true;
   bool _speakerOn = true;
   bool _remoteVideoOn = false;
+  bool _isSharing = false;
 
   @override
   void initState() {
@@ -174,6 +177,60 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     _engine.setDefaultAudioRouteToSpeakerphone(_speakerOn);
   }
 
+  Future<void> _toggleScreenShare() async {
+    if (!_isSharing) {
+      try {
+        final params = ScreenCaptureParameters2(
+          captureAudio: true,
+          audioParams: ScreenAudioParameters(
+            sampleRate: 48000,
+            channels: 2,
+            captureSignalVolume: 100,
+          ),
+          captureVideo: true,
+          videoParams: ScreenVideoParameters(
+            dimensions: const VideoDimensions(width: 1280, height: 720),
+            frameRate: 15,
+            bitrate: 1200,
+            contentHint: VideoContentHint.contentHintMotion,
+          ),
+        );
+
+        await _engine.startScreenCapture(params);
+        await _engine.updateChannelMediaOptions(
+          const ChannelMediaOptions(
+            publishScreenCaptureVideo: true,
+            publishScreenCaptureAudio: true,
+            publishCameraTrack: false,
+          ),
+        );
+        setState(() => _isSharing = true);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Screen share failed: $e${Platform.isIOS ? " — ensure ReplayKit Broadcast Extension is set up" : ""}',
+              ),
+            ),
+          );
+        }
+      }
+    } else {
+      try {
+        await _engine.stopScreenCapture();
+        await _engine.updateChannelMediaOptions(
+          ChannelMediaOptions(
+            publishScreenCaptureVideo: false,
+            publishScreenCaptureAudio: false,
+            publishCameraTrack: !_videoOff,
+          ),
+        );
+      } catch (_) {}
+      setState(() => _isSharing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,12 +259,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
           children: [
             _controlButton(Icons.mic, _toggleMute, active: _muted),
             const SizedBox(width: 20),
             _controlButton(Icons.videocam, _toggleVideo, active: _videoOff),
+            const SizedBox(width: 20),
+            _controlButton(
+              _isSharing ? Icons.stop_screen_share : Icons.screen_share,
+              _toggleScreenShare,
+              active: _isSharing,
+            ),
             const SizedBox(width: 20),
             _controlButton(Icons.cameraswitch, _switchCamera),
             const SizedBox(width: 20),
