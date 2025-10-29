@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../provider/auth_provider.dart';
 import '../../../widgets/buttons/primary_button.dart';
 import '../../../widgets/logo/primary_app_logo.dart';
 import '../../../widgets/text_fields/primary_password_field.dart';
 import '../../../widgets/text_fields/primay_text_form_fields.dart';
+import '../provider/auth_provider.dart';
 
 class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
@@ -74,7 +74,7 @@ class AuthScreen extends ConsumerWidget {
                     title: 'Log in',
                     isLoading: false,
                     onPressed: () {
-                      authRead.submit();
+                      authRead.submit(context);
                     },
                   ),
                 ],

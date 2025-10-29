@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:video_call_app/features/video_call/presentation/video_call_screen.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider();
@@ -27,11 +28,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void submit() {
+  void submit(BuildContext context) {
     if (formKey.currentState?.validate() ?? false) {
       if (emailController.text.trim() == dummyEmail &&
           passwordController.text.trim() == dummyPassword) {
-        log('Authentication successful');
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const VideoCallScreen()));
       } else {
         log('Authentication failed: Invalid email or password');
       }
