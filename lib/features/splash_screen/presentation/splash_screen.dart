@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_call_app/core/style/app_color.dart';
+import 'package:video_call_app/core/constants/app_color.dart';
 import 'package:video_call_app/features/auth/presentation/auth_screen.dart';
 import 'package:video_call_app/widgets/logo/primary_app_logo.dart';
 

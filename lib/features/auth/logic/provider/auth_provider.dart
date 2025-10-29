@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:video_call_app/features/users/presentation/user_list_screen.dart';
 
-import '../../../data/hive/hive_helper.dart';
+import '../../../../data/hive/hive_helper.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider();

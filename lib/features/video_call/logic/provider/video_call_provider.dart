@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/services/agora_config.dart';
-import '../../../../core/services/permissions.dart';
+import '../../../../core/services/permissions_service.dart';
 
 final videoCallProvider = ChangeNotifierProvider<VideoCallProvider>(
   (ref) => VideoCallProvider(),

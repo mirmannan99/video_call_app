@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/style/app_color.dart';
+import '../../core/constants/app_color.dart';
 import 'text_field_decoration.dart';
 
 class PrimaryTextFormField extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/style/app_color.dart';
-import '../dimension.dart';
+import '../../core/constants/app_color.dart';
+import '../../core/constants/dimension.dart';
 
 InputDecoration textFieldMainDecoration({
   required String hintText,
