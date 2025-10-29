@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:video_call_app/data/hive/hive_helper.dart';
@@ -106,13 +108,17 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
   }
 
   Future<void> _onLogout(LogoutEvent event, Emitter<UserListState> emit) async {
-    await HiveHelper.clearAuthToken();
-    await clear();
+    try {
+      await HiveHelper.clearAuthToken();
+      await clear();
 
-    locator<GlobalNavigator>().navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const AuthScreen()),
-      (route) => false,
-    );
-    emit(UserListInitial());
+      locator<GlobalNavigator>().navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
+      emit(UserListInitial());
+    } catch (e) {
+      log('Logout failed: $e');
+    }
   }
 }

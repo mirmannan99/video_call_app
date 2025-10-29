@@ -40,8 +40,12 @@ class _UserListScreenState extends State<UserListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<UserListBloc>().add(LogoutEvent());
+            onPressed: () async {
+              final confirm = await _showLogoutConfirmDialog();
+              if (confirm) {
+                if (!context.mounted) return;
+                context.read<UserListBloc>().add(LogoutEvent());
+              }
             },
           ),
         ],
@@ -103,5 +107,32 @@ class _UserListScreenState extends State<UserListScreen> {
       title: Text('${user.firstName} ${user.lastName}'),
       subtitle: Text(user.email),
     );
+  }
+
+  Future<bool> _showLogoutConfirmDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text('Log out'),
+              content: const Text('Are you sure you want to log out?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text(
+                    'Log out',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }
