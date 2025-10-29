@@ -34,8 +34,8 @@ class PrimaryTextFormField extends StatelessWidget {
       cursorColor: AppColors.primary,
       validator: validation,
       decoration: textFieldMainDecoration(
-        hintText: label!,
-        labelText: label!,
+        hintText: label ?? '',
+        labelText: label ?? '',
         labelStyle: const TextStyle(fontSize: 14, color: AppColors.textLight),
       ),
     );

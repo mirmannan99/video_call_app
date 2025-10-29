@@ -38,8 +38,8 @@ class PrimaryPasswordFormField extends StatelessWidget {
       cursorColor: AppColors.primary,
       validator: validation,
       decoration: passwordFieldMainDecoration(
-        hintText: label!,
-        labelText: label!,
+        hintText: label ?? '',
+        labelText: label ?? '',
         labelStyle: const TextStyle(fontSize: 14, color: AppColors.textLight),
         isObscure: isObscure,
         onShowPassword: onShowPassword ?? (() {}),
