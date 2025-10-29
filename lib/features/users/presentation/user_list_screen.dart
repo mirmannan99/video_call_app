@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:video_call_app/features/video_call/presentation/screens/video_call_screen.dart';
+import 'package:video_call_app/core/services/notification_service.dart';
 
+// import 'package:video_call_app/features/video_call/presentation/screens/video_call_screen.dart';
+
+import '../../video_call/presentation/video_call_screen.dart';
 import '../data/user_res_model.dart';
 import '../logic/bloc/user_list_bloc.dart';
 
@@ -39,6 +42,15 @@ class _UserListScreenState extends State<UserListScreen> {
       appBar: AppBar(
         title: const Text("Users"),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              NotificationService.instance.showIncomingCallNotification(
+                callerName: 'Someone',
+                roomId: 'room-123',
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -107,18 +119,14 @@ class _UserListScreenState extends State<UserListScreen> {
 
       title: Text('${user.firstName} ${user.lastName}'),
       subtitle: Text(user.email),
-      trailing: CircleAvatar(
-        backgroundColor: Colors.green,
-        radius: 20,
-        child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => VideoCallScreen()),
-            );
-          },
-          icon: const Icon(Icons.call, size: 25, color: Colors.white),
-        ),
+      trailing: IconButton(
+        icon: const Icon(Icons.call, color: Colors.green),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => VideoCallScreen()),
+          );
+        },
       ),
     );
   }

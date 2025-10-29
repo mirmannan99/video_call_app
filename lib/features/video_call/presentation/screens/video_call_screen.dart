@@ -13,16 +13,40 @@ class VideoCallScreen extends ConsumerStatefulWidget {
 }
 
 class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
+  late final VideoCallProvider _vc;
+  VoidCallback? _vcListener;
   @override
   void initState() {
     super.initState();
 
     Future.microtask(() => ref.read(videoCallProvider).init());
+    // Cache provider instance and initialize without using ref in dispose-time
+    _vc = ref.read(videoCallProvider);
+    Future.microtask(() => _vc.init());
+
+    // Listen for remote-end signal and close the screen safely
+    _vcListener = () async {
+      if (!mounted) return;
+      if (_vc.remoteEndRequested) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Call ended by the other user')),
+        );
+        await _vc.disposeEngine();
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      }
+    };
+    _vc.addListener(_vcListener!);
   }
 
   @override
   void dispose() {
-    ref.read(videoCallProvider).disposeEngine();
+    if (_vcListener != null) {
+      _vc.removeListener(_vcListener!);
+    }
+    // Avoid using ref in dispose; use cached provider instance
+    _vc.disposeEngine();
     super.dispose();
   }
 
@@ -86,7 +110,7 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
             backgroundColor: Colors.redAccent,
           ),
         );
-        await ref.read(videoCallProvider).disposeEngine();
+        await _vc.disposeEngine();
         if (!context.mounted) return;
         if (Navigator.canPop(context)) Navigator.of(context).pop();
       });
@@ -136,7 +160,7 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
             const SizedBox(width: 20),
             _controlButton(
               Icons.call_end,
-              () => ref.read(videoCallProvider).endCall(context),
+              () => _vc.endCall(context),
               color: Colors.red,
             ),
           ],

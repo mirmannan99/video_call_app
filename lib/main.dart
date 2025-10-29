@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_call_app/core/controller/global_naviagtor.dart';
+import 'package:video_call_app/core/services/notification_service.dart';
 import 'package:video_call_app/features/splash_screen/presentation/splash_screen.dart';
 import 'package:video_call_app/features/users/logic/bloc/user_list_bloc.dart';
 
@@ -24,6 +25,9 @@ Future<void> main() async {
   await Hive.openBox(HiveBoxNames.userBox);
 
   HydratedBloc.storage = storage;
+
+  // Initialize local notifications (mocked push)
+  await NotificationService.instance.init();
 
   runApp(ProviderScope(child: const MyApp()));
 }
