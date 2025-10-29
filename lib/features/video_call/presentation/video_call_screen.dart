@@ -17,6 +17,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   bool _localUserJoined = false;
   bool _muted = false;
   bool _videoOff = false;
+  bool _usingFrontCamera = true;
+  bool _speakerOn = true;
+  bool _remoteVideoOn = false;
 
   @override
   void initState() {
@@ -42,19 +45,47 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         },
         onUserOffline: (connection, remoteUid, reason) {
           debugPrint("Remote user left: $remoteUid");
-          setState(() => _remoteUid = null);
+          setState(() {
+            _remoteUid = null;
+            _remoteVideoOn = false;
+          });
         },
         onError: (err, msg) {
           debugPrint('Agora onError: $err - $msg');
         },
+        onConnectionStateChanged: (connection, state, reason) {
+          debugPrint('Connection state: $state, reason: $reason');
+        },
+        onRemoteAudioStateChanged: (connection, uid, state, reason, elapsed) {
+          debugPrint('Remote audio state for $uid: $state, reason: $reason');
+        },
+        onRemoteVideoStateChanged:
+            (connection, remoteUid, state, reason, elapsed) {
+              debugPrint(
+                'Remote video state for $remoteUid: $state, reason: $reason',
+              );
+              if (_remoteUid == remoteUid) {
+                final bool isOn =
+                    state == RemoteVideoState.remoteVideoStateDecoding ||
+                    state == RemoteVideoState.remoteVideoStateStarting;
+                setState(() => _remoteVideoOn = isOn);
+              }
+            },
       ),
     );
 
     await _engine.enableVideo();
+    await _engine.enableLocalVideo(true);
     await _engine.enableAudio();
+    await _engine.enableLocalAudio(true);
     await _engine.setDefaultAudioRouteToSpeakerphone(true);
+    await _engine.setAudioProfile(
+      profile: AudioProfileType.audioProfileDefault,
+      scenario: AudioScenarioType.audioScenarioDefault,
+    );
     await _engine.startPreview();
 
+    await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
     await _engine.joinChannel(
       token: AgoraConfig.token,
       channelId: AgoraConfig.channelName,
@@ -68,6 +99,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         autoSubscribeVideo: true,
       ),
     );
+
+    await _engine.adjustPlaybackSignalVolume(100);
+    await _engine.adjustRecordingSignalVolume(100);
   }
 
   @override
@@ -78,7 +112,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   Widget _remoteVideo() {
-    if (_remoteUid != null) {
+    if (_remoteUid != null && _remoteVideoOn) {
       return AgoraVideoView(
         controller: VideoViewController.remote(
           rtcEngine: _engine,
@@ -86,18 +120,24 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           connection: RtcConnection(channelId: AgoraConfig.channelName),
         ),
       );
-    } else {
-      return const Center(
-        child: Text(
-          'Waiting for remote user to join...',
-          style: TextStyle(color: Colors.white),
-        ),
+    }
+    if (_remoteUid != null && !_remoteVideoOn) {
+      return Container(
+        color: Colors.black,
+        alignment: Alignment.center,
+        child: const Icon(Icons.videocam_off, color: Colors.white70, size: 56),
       );
     }
+    return const Center(
+      child: Text(
+        'Waiting for remote user to join...',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
   }
 
   Widget _localPreview() {
-    if (_localUserJoined) {
+    if (_localUserJoined && !_videoOff) {
       return AgoraVideoView(
         controller: VideoViewController(
           rtcEngine: _engine,
@@ -105,8 +145,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         ),
       );
     } else {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+      return Container(
+        color: Colors.black,
+        alignment: Alignment.center,
+        child: const Icon(Icons.videocam_off, color: Colors.white70, size: 42),
       );
     }
   }
@@ -118,7 +160,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   void _toggleVideo() {
     setState(() => _videoOff = !_videoOff);
+    _engine.enableLocalVideo(!_videoOff);
     _engine.muteLocalVideoStream(_videoOff);
+  }
+
+  Future<void> _switchCamera() async {
+    await _engine.switchCamera();
+    setState(() => _usingFrontCamera = !_usingFrontCamera);
+  }
+
+  void _toggleSpeaker() {
+    setState(() => _speakerOn = !_speakerOn);
+    _engine.setDefaultAudioRouteToSpeakerphone(_speakerOn);
   }
 
   @override
@@ -155,6 +208,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
             _controlButton(Icons.mic, _toggleMute, active: _muted),
             const SizedBox(width: 20),
             _controlButton(Icons.videocam, _toggleVideo, active: _videoOff),
+            const SizedBox(width: 20),
+            _controlButton(Icons.cameraswitch, _switchCamera),
+            const SizedBox(width: 20),
+            _controlButton(
+              _speakerOn ? Icons.volume_up : Icons.volume_off,
+              _toggleSpeaker,
+              active: !_speakerOn,
+            ),
             const SizedBox(width: 20),
             _controlButton(
               Icons.call_end,
