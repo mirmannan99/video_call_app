@@ -1,130 +1,43 @@
-import 'dart:io' show Platform;
-
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/agora_config.dart';
-import '../../../../core/services/permissions.dart';
+import '../../logic/provider/video_call_provider.dart';
 
-class VideoCallScreen extends StatefulWidget {
+class VideoCallScreen extends ConsumerStatefulWidget {
   const VideoCallScreen({super.key});
 
   @override
-  State<VideoCallScreen> createState() => _VideoCallScreenState();
+  ConsumerState<VideoCallScreen> createState() => _VideoCallScreenState();
 }
 
-class _VideoCallScreenState extends State<VideoCallScreen> {
-  late final RtcEngine _engine;
-  int? _remoteUid;
-  bool _localUserJoined = false;
-  bool _muted = false;
-  bool _videoOff = false;
-  bool _usingFrontCamera = true;
-  bool _speakerOn = true;
-  bool _remoteVideoOn = false;
-  bool _isSharing = false;
-
+class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
   @override
   void initState() {
     super.initState();
-    _initAgora();
-  }
 
-  Future<void> _initAgora() async {
-    await AppPermissions.requestVideoCallPermissions();
-
-    _engine = createAgoraRtcEngine();
-    await _engine.initialize(const RtcEngineContext(appId: AgoraConfig.appId));
-
-    _engine.registerEventHandler(
-      RtcEngineEventHandler(
-        onJoinChannelSuccess: (connection, elapsed) {
-          debugPrint("Local user joined channel");
-          setState(() => _localUserJoined = true);
-        },
-        onUserJoined: (connection, remoteUid, elapsed) {
-          debugPrint("Remote user joined: $remoteUid");
-          setState(() => _remoteUid = remoteUid);
-        },
-        onUserOffline: (connection, remoteUid, reason) {
-          debugPrint("Remote user left: $remoteUid");
-          setState(() {
-            _remoteUid = null;
-            _remoteVideoOn = false;
-          });
-        },
-        onError: (err, msg) {
-          debugPrint('Agora onError: $err - $msg');
-        },
-        onConnectionStateChanged: (connection, state, reason) {
-          debugPrint('Connection state: $state, reason: $reason');
-        },
-        onRemoteAudioStateChanged: (connection, uid, state, reason, elapsed) {
-          debugPrint('Remote audio state for $uid: $state, reason: $reason');
-        },
-        onRemoteVideoStateChanged:
-            (connection, remoteUid, state, reason, elapsed) {
-              debugPrint(
-                'Remote video state for $remoteUid: $state, reason: $reason',
-              );
-              if (_remoteUid == remoteUid) {
-                final bool isOn =
-                    state == RemoteVideoState.remoteVideoStateDecoding ||
-                    state == RemoteVideoState.remoteVideoStateStarting;
-                setState(() => _remoteVideoOn = isOn);
-              }
-            },
-      ),
-    );
-
-    await _engine.enableVideo();
-    await _engine.enableLocalVideo(true);
-    await _engine.enableAudio();
-    await _engine.enableLocalAudio(true);
-    await _engine.setDefaultAudioRouteToSpeakerphone(true);
-    await _engine.setAudioProfile(
-      profile: AudioProfileType.audioProfileDefault,
-      scenario: AudioScenarioType.audioScenarioDefault,
-    );
-    await _engine.startPreview();
-
-    await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
-    await _engine.joinChannel(
-      token: AgoraConfig.token,
-      channelId: AgoraConfig.channelName,
-      uid: 0,
-      options: const ChannelMediaOptions(
-        channelProfile: ChannelProfileType.channelProfileCommunication,
-        clientRoleType: ClientRoleType.clientRoleBroadcaster,
-        publishCameraTrack: true,
-        publishMicrophoneTrack: true,
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: true,
-      ),
-    );
-
-    await _engine.adjustPlaybackSignalVolume(100);
-    await _engine.adjustRecordingSignalVolume(100);
+    Future.microtask(() => ref.read(videoCallProvider).init());
   }
 
   @override
   void dispose() {
-    _engine.leaveChannel();
-    _engine.release();
+    ref.read(videoCallProvider).disposeEngine();
     super.dispose();
   }
 
   Widget _remoteVideo() {
-    if (_remoteUid != null && _remoteVideoOn) {
+    final p = ref.watch(videoCallProvider);
+    if (p.engine != null && p.remoteUid != null && p.remoteVideoOn) {
       return AgoraVideoView(
         controller: VideoViewController.remote(
-          rtcEngine: _engine,
-          canvas: VideoCanvas(uid: _remoteUid),
+          rtcEngine: p.engine!,
+          canvas: VideoCanvas(uid: p.remoteUid),
           connection: RtcConnection(channelId: AgoraConfig.channelName),
         ),
       );
     }
-    if (_remoteUid != null && !_remoteVideoOn) {
+    if (p.remoteUid != null && !p.remoteVideoOn) {
       return Container(
         color: Colors.black,
         alignment: Alignment.center,
@@ -140,10 +53,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   Widget _localPreview() {
-    if (_localUserJoined && !_videoOff) {
+    final p = ref.watch(videoCallProvider);
+    if (p.engine != null && p.localUserJoined && !p.videoOff) {
       return AgoraVideoView(
         controller: VideoViewController(
-          rtcEngine: _engine,
+          rtcEngine: p.engine!,
           canvas: const VideoCanvas(uid: 0),
         ),
       );
@@ -156,83 +70,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }
   }
 
-  void _toggleMute() {
-    setState(() => _muted = !_muted);
-    _engine.muteLocalAudioStream(_muted);
-  }
-
-  void _toggleVideo() {
-    setState(() => _videoOff = !_videoOff);
-    _engine.enableLocalVideo(!_videoOff);
-    _engine.muteLocalVideoStream(_videoOff);
-  }
-
-  Future<void> _switchCamera() async {
-    await _engine.switchCamera();
-    setState(() => _usingFrontCamera = !_usingFrontCamera);
-  }
-
-  void _toggleSpeaker() {
-    setState(() => _speakerOn = !_speakerOn);
-    _engine.setDefaultAudioRouteToSpeakerphone(_speakerOn);
-  }
-
-  Future<void> _toggleScreenShare() async {
-    if (!_isSharing) {
-      try {
-        final params = ScreenCaptureParameters2(
-          captureAudio: true,
-          audioParams: ScreenAudioParameters(
-            sampleRate: 48000,
-            channels: 2,
-            captureSignalVolume: 100,
-          ),
-          captureVideo: true,
-          videoParams: ScreenVideoParameters(
-            dimensions: const VideoDimensions(width: 1280, height: 720),
-            frameRate: 15,
-            bitrate: 1200,
-            contentHint: VideoContentHint.contentHintMotion,
-          ),
-        );
-
-        await _engine.startScreenCapture(params);
-        await _engine.updateChannelMediaOptions(
-          const ChannelMediaOptions(
-            publishScreenCaptureVideo: true,
-            publishScreenCaptureAudio: true,
-            publishCameraTrack: false,
-          ),
-        );
-        setState(() => _isSharing = true);
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Screen share failed: $e${Platform.isIOS ? " — ensure ReplayKit Broadcast Extension is set up" : ""}',
-              ),
-            ),
-          );
-        }
-      }
-    } else {
-      try {
-        await _engine.stopScreenCapture();
-        await _engine.updateChannelMediaOptions(
-          ChannelMediaOptions(
-            publishScreenCaptureVideo: false,
-            publishScreenCaptureAudio: false,
-            publishCameraTrack: !_videoOff,
-          ),
-        );
-      } catch (_) {}
-      setState(() => _isSharing = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final p = ref.watch(videoCallProvider);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -248,35 +88,35 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               child: _localPreview(),
             ),
           ),
-          bottomBar(),
+          bottomBar(p),
         ],
       ),
     );
   }
 
-  Widget bottomBar() {
+  Widget bottomBar(VideoCallProvider p) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 15),
         child: Row(
           children: [
-            _controlButton(Icons.mic, _toggleMute, active: _muted),
+            _controlButton(Icons.mic, p.toggleMute, active: p.muted),
             const SizedBox(width: 20),
-            _controlButton(Icons.videocam, _toggleVideo, active: _videoOff),
+            _controlButton(Icons.videocam, p.toggleVideo, active: p.videoOff),
             const SizedBox(width: 20),
             _controlButton(
-              _isSharing ? Icons.stop_screen_share : Icons.screen_share,
-              _toggleScreenShare,
-              active: _isSharing,
+              p.isSharing ? Icons.stop_screen_share : Icons.screen_share,
+              () => p.toggleScreenShare(context),
+              active: p.isSharing,
             ),
             const SizedBox(width: 20),
-            _controlButton(Icons.cameraswitch, _switchCamera),
+            _controlButton(Icons.cameraswitch, p.switchCamera),
             const SizedBox(width: 20),
             _controlButton(
-              _speakerOn ? Icons.volume_up : Icons.volume_off,
-              _toggleSpeaker,
-              active: !_speakerOn,
+              p.speakerOn ? Icons.volume_up : Icons.volume_off,
+              p.toggleSpeaker,
+              active: !p.speakerOn,
             ),
             const SizedBox(width: 20),
             _controlButton(
