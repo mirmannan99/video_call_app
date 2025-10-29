@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -75,7 +76,20 @@ class _UserListScreenState extends State<UserListScreen> {
 
   Widget _userTile(UserData user) {
     return ListTile(
-      leading: CircleAvatar(backgroundImage: NetworkImage(user.avatar)),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: CachedNetworkImage(
+          imageUrl: user.avatar,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          placeholder: (context, url) =>
+              const CircularProgressIndicator(strokeWidth: 1),
+          errorWidget: (context, url, error) =>
+              const Icon(Icons.person, size: 40, color: Colors.grey),
+        ),
+      ),
+
       title: Text('${user.firstName} ${user.lastName}'),
       subtitle: Text(user.email),
     );

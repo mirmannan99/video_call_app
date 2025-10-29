@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_call_app/features/users/logic/bloc/user_list_bloc.dart';
 
 import 'features/users/presentation/user_list_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final storage = await HydratedStorage.build(
+    storageDirectory: HydratedStorageDirectory(
+      (await getTemporaryDirectory()).path,
+    ),
+  );
+
+  HydratedBloc.storage = storage;
   runApp(ProviderScope(child: const MyApp()));
 }
 
