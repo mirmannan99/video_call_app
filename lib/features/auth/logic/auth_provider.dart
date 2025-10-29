@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:video_call_app/features/users/presentation/user_list_screen.dart';
 
 import '../../../data/hive/hive_helper.dart';
+import '../../video_call/presentation/screens/video_call_screen.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider();
@@ -41,14 +41,12 @@ class AuthProvider extends ChangeNotifier {
           passwordController.text.trim() == dummyPassword) {
         toggleLoading();
         await Future.delayed(const Duration(seconds: 2));
-
+        await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
+        toggleLoading();
         if (!context.mounted) return;
         Navigator.of(
           context,
-        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
-
-        await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
-        toggleLoading();
+        ).push(MaterialPageRoute(builder: (_) => const VideoCallScreen()));
       } else {
         log('Authentication failed: Invalid email or password');
       }

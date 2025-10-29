@@ -3,8 +3,8 @@ import 'dart:io' show Platform;
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/services/agora_config.dart';
-import '../../../core/services/permissions.dart';
+import '../../../../core/services/agora_config.dart';
+import '../../../../core/services/permissions.dart';
 
 class VideoCallScreen extends StatefulWidget {
   const VideoCallScreen({super.key});
@@ -248,19 +248,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               child: _localPreview(),
             ),
           ),
-          _bottomBar(),
+          bottomBar(),
         ],
       ),
     );
   }
 
-  Widget _bottomBar() {
+  Widget bottomBar() {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: ListView(
-          scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 15),
+        child: Row(
           children: [
             _controlButton(Icons.mic, _toggleMute, active: _muted),
             const SizedBox(width: 20),
@@ -297,12 +296,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     bool active = false,
     Color color = Colors.white,
   }) {
-    return CircleAvatar(
-      radius: 28,
-      backgroundColor: active ? Colors.grey.shade800 : Colors.grey.shade700,
-      child: IconButton(
-        icon: Icon(icon, color: active ? Colors.grey : color, size: 28),
-        onPressed: onTap,
+    return Expanded(
+      child: CircleAvatar(
+        radius: 28,
+        backgroundColor: active ? Colors.grey.shade800 : Colors.grey.shade700,
+        child: IconButton(
+          icon: Icon(icon, color: active ? Colors.grey : color, size: 28),
+          onPressed: onTap,
+        ),
       ),
     );
   }
