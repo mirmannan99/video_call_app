@@ -79,7 +79,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   const SizedBox(height: 24),
                   PrimaryButton(
                     title: 'Log in',
-                    isLoading: false,
+                    isLoading: authWatch.isLoading,
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
                         authRead.submit(context);

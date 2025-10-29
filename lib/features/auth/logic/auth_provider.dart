@@ -23,22 +23,44 @@ class AuthProvider extends ChangeNotifier {
   );
 
   bool showPassword = false;
+  bool isLoading = false;
 
   void toggleShowPassword() {
     showPassword = !showPassword;
     notifyListeners();
   }
 
-  void submit(BuildContext context) async {
-    if (emailController.text.trim() == dummyEmail &&
-        passwordController.text.trim() == dummyPassword) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
+  void toggleLoading() {
+    isLoading = !isLoading;
+    notifyListeners();
+  }
 
-      await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
-    } else {
-      log('Authentication failed: Invalid email or password');
+  void submit(BuildContext context) async {
+    try {
+      if (emailController.text.trim() == dummyEmail &&
+          passwordController.text.trim() == dummyPassword) {
+        toggleLoading();
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (!context.mounted) return;
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
+
+        await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
+        toggleLoading();
+      } else {
+        log('Authentication failed: Invalid email or password');
+      }
+    } catch (e) {
+      log('Authentication failed: $e');
+      if (isLoading) {
+        toggleLoading();
+      }
+    } finally {
+      if (isLoading) {
+        toggleLoading();
+      }
     }
   }
 }
