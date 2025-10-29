@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 
 import '../../../core/controller/api_res_controller.dart';
@@ -25,8 +23,6 @@ class UserRepository {
     try {
       final res = await _dio.get('users?page=$page&per_page=$perPage');
       if (res.statusCode == 200) {
-        log('Fetched users data: ${res.data.toString()}');
-        // log('Fetched users data: ${data.toString()}');
         return ApiResponse(data: UserResModel.fromJson(res.data));
       }
       return ApiResponse(

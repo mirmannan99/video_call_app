@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:video_call_app/features/video_call/presentation/video_call_screen.dart';
+import 'package:video_call_app/features/users/presentation/user_list_screen.dart';
 
 import '../../../data/hive/hive_helper.dart';
 
@@ -36,7 +36,7 @@ class AuthProvider extends ChangeNotifier {
           passwordController.text.trim() == dummyPassword) {
         Navigator.of(
           context,
-        ).push(MaterialPageRoute(builder: (_) => const VideoCallScreen()));
+        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
 
         await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
       } else {

@@ -30,14 +30,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hipster Inc Video Call App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: BlocProvider(
-        create: (context) => UserListBloc(),
-        child: const SplashScreen(),
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => UserListBloc())],
+      child: MaterialApp(
+        title: 'Hipster Inc Video Call App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: BlocProvider(
+          create: (context) => UserListBloc(),
+          child: const SplashScreen(),
+        ),
       ),
     );
   }
