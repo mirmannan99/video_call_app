@@ -1,6 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:video_call_app/data/hive/hive_helper.dart';
+import 'package:video_call_app/features/auth/presentation/auth_screen.dart';
 
+import '../../../../configs/dependency_injection.dart';
+import '../../../../core/controller/global_naviagtor.dart';
 import '../../data/user_repository.dart';
 import '../../data/user_res_model.dart';
 
@@ -10,6 +14,7 @@ part 'user_list_state.dart';
 class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
   UserListBloc() : super(UserListInitial()) {
     on<FetchUsersEvent>(_onFetchUsers);
+    on<LogoutEvent>(_onLogout);
   }
 
   Future<void> _onFetchUsers(
@@ -98,5 +103,16 @@ class UserListBloc extends HydratedBloc<UserListEvent, UserListState> {
       };
     }
     return null;
+  }
+
+  Future<void> _onLogout(LogoutEvent event, Emitter<UserListState> emit) async {
+    await HiveHelper.clearAuthToken();
+    await clear();
+
+    locator<GlobalNavigator>().navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AuthScreen()),
+      (route) => false,
+    );
+    emit(UserListInitial());
   }
 }

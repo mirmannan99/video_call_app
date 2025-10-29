@@ -13,7 +13,6 @@ final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
 class AuthProvider extends ChangeNotifier {
   final String dummyEmail = 'test@example.com';
   final String dummyPassword = 'password123';
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final TextEditingController emailController = TextEditingController(
     text: "test@example.com",
@@ -31,17 +30,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void submit(BuildContext context) async {
-    if (formKey.currentState?.validate() ?? false) {
-      if (emailController.text.trim() == dummyEmail &&
-          passwordController.text.trim() == dummyPassword) {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
+    if (emailController.text.trim() == dummyEmail &&
+        passwordController.text.trim() == dummyPassword) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
 
-        await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
-      } else {
-        log('Authentication failed: Invalid email or password');
-      }
+      await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
+    } else {
+      log('Authentication failed: Invalid email or password');
     }
   }
 }

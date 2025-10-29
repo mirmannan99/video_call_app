@@ -9,3 +9,5 @@ class FetchUsersEvent extends UserListEvent {
 
   FetchUsersEvent({this.page = 1, this.isRefresh = false});
 }
+
+class LogoutEvent extends UserListEvent {}

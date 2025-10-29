@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_call_app/core/controller/global_naviagtor.dart';
 import 'package:video_call_app/features/splash_screen/presentation/splash_screen.dart';
 import 'package:video_call_app/features/users/logic/bloc/user_list_bloc.dart';
 
+import 'configs/dependency_injection.dart';
 import 'data/hive/hive_keys.dart';
 
 Future<void> main() async {
@@ -16,6 +18,7 @@ Future<void> main() async {
       (await getTemporaryDirectory()).path,
     ),
   );
+  setupLocator();
   //+ Hive
   await Hive.initFlutter();
   await Hive.openBox(HiveBoxNames.userBox);
@@ -34,6 +37,7 @@ class MyApp extends StatelessWidget {
       providers: [BlocProvider(create: (context) => UserListBloc())],
       child: MaterialApp(
         title: 'Hipster Inc Video Call App',
+        navigatorKey: locator<GlobalNavigator>().navigatorKey,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),

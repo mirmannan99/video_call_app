@@ -3,6 +3,8 @@ import 'package:video_call_app/core/style/app_color.dart';
 import 'package:video_call_app/features/auth/presentation/auth_screen.dart';
 import 'package:video_call_app/widgets/logo/primary_app_logo.dart';
 
+import '../../../configs/dependency_injection.dart';
+import '../../../core/controller/global_naviagtor.dart';
 import '../../../data/hive/hive_helper.dart';
 import '../../users/presentation/user_list_screen.dart';
 
@@ -31,9 +33,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final isLoggedIn = await HiveHelper.getAuthToken() != null;
     if (mounted) {
       if (isLoggedIn) {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
+        locator<GlobalNavigator>().navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const UserListScreen()),
+        );
       } else {
         Navigator.of(
           context,

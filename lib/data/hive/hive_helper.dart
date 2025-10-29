@@ -21,4 +21,13 @@ class HiveHelper {
       rethrow;
     }
   }
+
+  static Future<void> clearAuthToken() async {
+    try {
+      final token = Hive.box(HiveBoxNames.userBox);
+      await token.delete(HiveKeys.accessToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

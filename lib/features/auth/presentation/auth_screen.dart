@@ -7,11 +7,18 @@ import '../../../widgets/text_fields/primary_password_field.dart';
 import '../../../widgets/text_fields/primay_text_form_fields.dart';
 import '../logic/auth_provider.dart';
 
-class AuthScreen extends ConsumerWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
     final authWatch = ref.watch(authProvider);
     final authRead = ref.read(authProvider);
     return Scaffold(
@@ -20,7 +27,7 @@ class AuthScreen extends ConsumerWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Form(
-              key: authWatch.formKey,
+              key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -74,7 +81,9 @@ class AuthScreen extends ConsumerWidget {
                     title: 'Log in',
                     isLoading: false,
                     onPressed: () {
-                      authRead.submit(context);
+                      if (_formKey.currentState?.validate() ?? false) {
+                        authRead.submit(context);
+                      }
                     },
                   ),
                 ],

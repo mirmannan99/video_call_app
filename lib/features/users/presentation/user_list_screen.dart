@@ -35,7 +35,17 @@ class _UserListScreenState extends State<UserListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Users")),
+      appBar: AppBar(
+        title: const Text("Users"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              context.read<UserListBloc>().add(LogoutEvent());
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<UserListBloc, UserListState>(
         builder: (context, state) {
           if (state is UserListLoading) {
