@@ -14,13 +14,9 @@ class AuthProvider extends ChangeNotifier {
   final String dummyEmail = 'test@example.com';
   final String dummyPassword = 'password123';
 
-  final TextEditingController emailController = TextEditingController(
-    text: "test@example.com",
-  );
+  final TextEditingController emailController = TextEditingController();
 
-  final TextEditingController passwordController = TextEditingController(
-    text: "password123",
-  );
+  final TextEditingController passwordController = TextEditingController();
 
   bool showPassword = false;
   bool isLoading = false;

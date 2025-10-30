@@ -8,8 +8,6 @@ A Flutter demo app showcasing:
 - Screen sharing (mobile)
 - Local notifications (mocked incoming call)
 
----
-
 ## Build & Run
 
 Prerequisites:
@@ -141,6 +139,29 @@ Notes:
 - Hydration: user list persists only the “loaded” state. Logout clears persisted
   auth and user state.
 
+Additional notes:
+
+- Offline cache scope: Only the Users list is cached (last successful snapshot).
+  Pagination merges during online use; if a refresh fails, the prior successful
+  state is preserved and shown. There’s no write-through or conflict resolution.
+- Call model: Single 1:1 calls only; no group calls, lobby, or matchmaking.
+  There’s no automatic rejoin/retry on network loss and no token renewal flow.
+- Notifications: Local-only mock. No CallKit (iOS) / Telecom (Android) UI, no
+  full-screen intent, and no VoIP push. Background/terminated behavior is
+  limited without real push + platform integrations.
+- Screen share behavior can vary by device/OEM. Long sessions may suspend when
+  the app is backgrounded. For iOS production-quality sharing, ReplayKit is
+  required; on Android, user consent prompts are expected.
+- Permissions UX is minimal: the app requests camera/mic/notifications at
+  runtime but doesn’t offer in-app toggles or detailed rationale screens.
+- Performance: Platform views (video) are sensitive to composition. Avoid
+  clipping/opacity/transforms around video surfaces; older devices may exhibit
+  frame drops during screen share.
+- CI artifacts: iOS build is produced without codesigning and cannot be
+  installed on devices as-is; use your team/signing for distribution.
+- Internationalization/accessibility: English-only UI, no RTL layout tuning, and
+  no formal accessibility audit.
+
 ---
 
 ## Troubleshooting
@@ -193,7 +214,7 @@ GitHub Actions (macOS) will:
 - Build Android APKs (split per ABI)
 - Build iOS (no codesign) and zip IPA
 - Publish artifacts to a GitHub release (`v1.0.<run_number>`) using a repo
-  secret `TOKEN`
+  secret `GITHUB_TOKEN`
 
 ---
 
