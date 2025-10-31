@@ -40,11 +40,23 @@ class AuthProvider extends ChangeNotifier {
         await HiveHelper.saveAccessToken(accessToken: "dummy_access_token");
         toggleLoading();
         if (!context.mounted) return;
+        clearControllers();
         Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => const UserListScreen()));
       } else {
-        log('Authentication failed: Invalid email or password');
+        SnackBar snackBar = const SnackBar(
+          content: Text(
+            'Invalid email or password',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
       log('Authentication failed: $e');
@@ -56,5 +68,17 @@ class AuthProvider extends ChangeNotifier {
         toggleLoading();
       }
     }
+  }
+
+  clearControllers() {
+    emailController.clear();
+    passwordController.clear();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

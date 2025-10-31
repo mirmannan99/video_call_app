@@ -60,7 +60,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   const SizedBox(height: 16),
                   PrimaryPasswordFormField(
                     controller: authWatch.passwordController,
-                    isObscure: authWatch.showPassword,
+                    isObscure: !authWatch.showPassword,
 
                     label: 'Password',
                     hideShowPassword: () {

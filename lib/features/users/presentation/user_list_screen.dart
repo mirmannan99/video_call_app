@@ -52,6 +52,16 @@ class _UserListScreenState extends State<UserListScreen> {
             },
           ),
           IconButton(
+            tooltip: 'Start Video Call with other user',
+            icon: const Icon(Icons.call, color: Colors.green),
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => VideoCallScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               final confirm = await _showLogoutConfirmDialog();
@@ -120,6 +130,7 @@ class _UserListScreenState extends State<UserListScreen> {
       title: Text('${user.firstName} ${user.lastName}'),
       subtitle: Text(user.email),
       trailing: IconButton(
+        tooltip: 'Call other user',
         icon: const Icon(Icons.call, color: Colors.green),
         onPressed: () {
           Navigator.push(
